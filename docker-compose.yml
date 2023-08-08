@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  ambassador-db:
+    container_name: ambassador-db
+    image: mysql:8.1
+    environment:
+      - MYSQL_DATABASE=ambassador_db
+      - MYSQL_USER=ambas
+      - MYSQL_PASSWORD=ampass3210
+      - MYSQL_ROOT_PASSWORD=rootampass3210
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - C:\Users\BeBetter\Documents\repo\ambassador-api\mysql:/var/lib/mysql
+
+  ambassador-phpmyadmin:
+    depends_on:
+      - ambassador-db
+    container_name: ambassador-phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.2
+    environment:
+      - PMA_HOST=ambassador-db
+    ports:
+      - "8001:80"
+    restart: always

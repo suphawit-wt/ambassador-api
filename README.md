@@ -1,1 +1,1 @@
-# ambassador-api
+# Ambassador API
