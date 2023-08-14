@@ -127,3 +127,72 @@ func Logout(c *fiber.Ctx) error {
 		"message": "Logout Successfully!",
 	})
 }
+
+func UpdateInfo(c *fiber.Ctx) error {
+	req := models.UpdateInfoRequest{}
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	userId, err := utils.GetUserIdFromToken(c)
+	if err != nil {
+		panic(err)
+	}
+
+	user := models.User{
+		Id:        userId,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+	}
+
+	database.DB.Model(&user).Updates(&user)
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Update User Info Successfully!",
+	})
+}
+
+func UpdatePassword(c *fiber.Ctx) error {
+	req := models.UpdatePasswordRequest{}
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	userId, err := utils.GetUserIdFromToken(c)
+	if err != nil {
+		panic(err)
+	}
+
+	user := models.User{
+		Id: userId,
+	}
+
+	user.SetPassword(req.Password)
+
+	database.DB.Model(&user).Updates(&user)
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Update User Info Successfully!",
+	})
+}

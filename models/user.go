@@ -16,6 +16,16 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdateInfoRequest struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Email     string `json:"email" validate:"required,email" `
+}
+
+type UpdatePasswordRequest struct {
+	Password string `json:"password" validate:"required"`
+}
+
 func (user *User) SetPassword(password string) error {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
