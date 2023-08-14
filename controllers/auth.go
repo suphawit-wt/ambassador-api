@@ -3,10 +3,13 @@ package controllers
 import (
 	"ambassador/database"
 	"ambassador/models"
+	"ambassador/utils"
+	"strconv"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/golang-jwt/jwt"
 )
 
 func Register(c *fiber.Ctx) error {
@@ -25,24 +28,20 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"message": "Internal Server Error",
-		})
-	}
-
 	user := models.User{
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
 		Email:        req.Email,
-		Password:     passwordHash,
 		IsAmbassador: false,
+	}
+
+	if err := user.SetPassword(req.Password); err != nil {
+		panic(err)
 	}
 
 	database.DB.Create(&user)
 
-	return c.JSON(fiber.Map{
+	return c.Status(201).JSON(fiber.Map{
 		"message": "Register Successfully!",
 	})
 }
@@ -71,7 +70,60 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	if err := user.VerifyPassword(req.Password); err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"message": "Email or Password is invalid.",
+		})
+	}
+
+	payload := jwt.StandardClaims{
+		Subject:   strconv.Itoa(int(user.Id)),
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	}
+
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, payload).SignedString([]byte("secret"))
+	if err != nil {
+		panic(err)
+	}
+
+	accessTokenCookie := fiber.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&accessTokenCookie)
+
+	return c.Status(200).JSON(fiber.Map{
 		"message": "Login Successfully!",
+	})
+}
+
+func User(c *fiber.Ctx) error {
+	user := models.User{}
+
+	userId, err := utils.GetUserIdFromToken(c)
+	if err != nil {
+		panic(err)
+	}
+
+	database.DB.Where("id = ?", userId).First(&user)
+
+	return c.Status(200).JSON(user)
+}
+
+func Logout(c *fiber.Ctx) error {
+	accessTokenCookie := fiber.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&accessTokenCookie)
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Logout Successfully!",
 	})
 }
