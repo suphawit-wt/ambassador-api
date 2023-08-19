@@ -3,6 +3,7 @@ module ambassador
 go 1.21.0
 
 require (
+	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/go-playground/validator/v10 v10.15.0
 	github.com/gofiber/fiber/v2 v2.48.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible

@@ -86,14 +86,7 @@ func Login(c *fiber.Ctx) error {
 		panic(err)
 	}
 
-	accessTokenCookie := fiber.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Expires:  time.Now().Add(time.Hour * 24),
-		HTTPOnly: true,
-	}
-
-	c.Cookie(&accessTokenCookie)
+	utils.SetCookie(c, "access_token", accessToken, time.Now().Add(time.Hour*24))
 
 	return c.Status(200).JSON(fiber.Map{
 		"message": "Login Successfully!",
@@ -114,14 +107,7 @@ func User(c *fiber.Ctx) error {
 }
 
 func Logout(c *fiber.Ctx) error {
-	accessTokenCookie := fiber.Cookie{
-		Name:     "access_token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		HTTPOnly: true,
-	}
-
-	c.Cookie(&accessTokenCookie)
+	utils.ClearCookie(c, "access_token")
 
 	return c.Status(200).JSON(fiber.Map{
 		"message": "Logout Successfully!",

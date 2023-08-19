@@ -6,9 +6,9 @@ import (
 )
 
 func IsAuthenticated(c *fiber.Ctx) error {
-	cookie := c.Cookies("access_token")
+	accessTokenCookie := c.Cookies("access_token")
 
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(accessTokenCookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 	if err != nil || !token.Valid {
