@@ -3,7 +3,6 @@ package controllers
 import (
 	"ambassador/database"
 	"ambassador/models"
-	"ambassador/utils"
 	"context"
 	"encoding/json"
 	"sort"
@@ -40,6 +39,8 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 
 	database.DB.Create(&product)
+
+	go database.ClearCache("products_frontend", "products_backend")
 
 	return c.Status(201).JSON(fiber.Map{
 		"message": "Created Product Successfully!",
@@ -103,8 +104,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	database.DB.Save(&product)
 
-	go utils.DeleteCache("products_frontend")
-	go utils.DeleteCache("products_backend")
+	go database.ClearCache("products_frontend", "products_backend")
 
 	return c.Status(200).JSON(fiber.Map{
 		"message": "Updated Product Successfully!",
@@ -124,6 +124,8 @@ func DeleteProduct(c *fiber.Ctx) error {
 			"message": "Not Found.",
 		})
 	}
+
+	go database.ClearCache("products_frontend", "products_backend")
 
 	return c.Status(200).JSON(fiber.Map{
 		"message": "Deleted Product Successfully!",

@@ -45,6 +45,10 @@ func (user *User) VerifyPassword(password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 }
 
+func (user *User) Name() string {
+	return user.FirstName + " " + user.LastName
+}
+
 type Admin User
 
 func (admin *Admin) CalculateRevenue(db *gorm.DB) {
