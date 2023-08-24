@@ -12,7 +12,7 @@ import (
 )
 
 func Register(c *fiber.Ctx) error {
-	req := models.User{}
+	req := models.RegisterRequest{}
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{
