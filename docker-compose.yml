@@ -31,3 +31,11 @@ services:
     ports:
       - 6379:6379
     restart: always
+
+  ambassador-mailhog:
+    container_name: ambassador-mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - 1025:1025
+      - 8025:8025
+    restart: always

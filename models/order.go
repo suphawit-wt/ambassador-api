@@ -41,6 +41,10 @@ type CreateOrderRequest struct {
 	Products  []map[string]int `json:"products"`
 }
 
+type ConfirmOrderRequest struct {
+	Source string `json:"source"`
+}
+
 func (order *Order) FullName() string {
 	return order.FirstName + " " + order.LastName
 }
