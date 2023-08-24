@@ -29,6 +29,18 @@ type OrderItem struct {
 	AmbassadorRevenue float64 `json:"ambassador_revenue"`
 }
 
+type CreateOrderRequest struct {
+	Code      string           `json:"code"`
+	FirstName string           `json:"first_name"`
+	LastName  string           `json:"last_name"`
+	Email     string           `json:"email"`
+	Address   string           `json:"address"`
+	Country   string           `json:"country"`
+	City      string           `json:"city"`
+	Zip       string           `json:"zip"`
+	Products  []map[string]int `json:"products"`
+}
+
 func (order *Order) FullName() string {
 	return order.FirstName + " " + order.LastName
 }
