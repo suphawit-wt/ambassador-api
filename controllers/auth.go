@@ -4,12 +4,11 @@ import (
 	"ambassador/database"
 	"ambassador/models"
 	"ambassador/utils"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
 )
 
 func Register(c *fiber.Ctx) error {
@@ -32,7 +31,7 @@ func Register(c *fiber.Ctx) error {
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
 		Email:        req.Email,
-		IsAmbassador: false,
+		IsAmbassador: strings.Contains(c.Path(), "/api/ambassador"),
 	}
 
 	if err := user.SetPassword(req.Password); err != nil {
@@ -76,12 +75,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	payload := jwt.StandardClaims{
-		Subject:   strconv.Itoa(int(user.Id)),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-	}
-
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, payload).SignedString([]byte("secret"))
+	accessToken, err := utils.GenerateAccessToken(user.Id)
 	if err != nil {
 		panic(err)
 	}
@@ -102,6 +96,19 @@ func User(c *fiber.Ctx) error {
 	}
 
 	database.DB.Where("id = ?", userId).First(&user)
+
+	isAmbassador, err := utils.CheckIsAmbassador(userId)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	if isAmbassador == true {
+		ambassador := models.Ambassador(user)
+		ambassador.CalculateRevenue(database.DB)
+		return c.Status(200).JSON(ambassador)
+	}
 
 	return c.Status(200).JSON(user)
 }
