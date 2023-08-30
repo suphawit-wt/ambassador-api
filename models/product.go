@@ -5,5 +5,5 @@ type Product struct {
 	Title       string  `json:"title" validate:"required"`
 	Description string  `json:"description" validate:"required"`
 	Image       string  `json:"image"`
-	Price       float64 `json:"price" validate:"required"`
+	Price       float64 `json:"price" validate:"required" gorm:"type:decimal(10,2);"`
 }

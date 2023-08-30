@@ -13,9 +13,9 @@ func main() {
 
 	for i := 0; i < 30; i++ {
 		product := models.Product{
-			Title:       faker.Word(),
+			Title:       faker.Username(),
 			Description: faker.Username(),
-			Image:       faker.URL(),
+			Image:       faker.URL() + ".png",
 			Price:       float64(rand.Intn(90) + 10),
 		}
 
