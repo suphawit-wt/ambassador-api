@@ -67,9 +67,7 @@ func CreateLink(c *fiber.Ctx) error {
 
 	database.DB.Create(&link)
 
-	return c.Status(201).JSON(fiber.Map{
-		"message": "Created Link Successfully!",
-	})
+	return c.Status(201).JSON(link)
 }
 
 func GetStats(c *fiber.Ctx) error {
