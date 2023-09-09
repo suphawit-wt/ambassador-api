@@ -12,7 +12,7 @@ services:
       - "3306:3306"
     restart: always
     volumes:
-      - C:\Users\BeBetter\Documents\repo\ambassador-api\mysql:/var/lib/mysql
+      - /home/bebetter/repo/ambassador-api/mysql:/var/lib/mysql
 
   ambassador-phpmyadmin:
     depends_on:
