@@ -12,7 +12,7 @@ services:
       - "3306:3306"
     restart: always
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
 
   ambassador-phpmyadmin:
     depends_on:

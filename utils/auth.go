@@ -3,6 +3,7 @@ package utils
 import (
 	"ambassador/database"
 	"ambassador/models"
+	"os"
 	"strconv"
 	"time"
 
@@ -10,13 +11,13 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-const SecretKey string = "secret"
+var JwtSecret string = os.Getenv("JWT_SECRET")
 
 func GetUserIdFromToken(c *fiber.Ctx) (uint, error) {
 	cookie := c.Cookies("access_token")
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
+		return []byte(JwtSecret), nil
 	})
 	if err != nil {
 		return 0, err
@@ -41,7 +42,7 @@ func CheckIsAmbassador(userId uint) (bool, error) {
 		}
 	}
 
-	if user.IsAmbassador == true {
+	if user.IsAmbassador {
 		return true, nil
 	} else {
 		return false, nil
@@ -54,7 +55,7 @@ func GenerateAccessToken(userId uint) (string, error) {
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 	}
 
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, payload).SignedString([]byte(SecretKey))
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, payload).SignedString([]byte(JwtSecret))
 
 	return accessToken, err
 }

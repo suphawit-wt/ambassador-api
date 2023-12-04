@@ -2,19 +2,20 @@ package middlewares
 
 import (
 	"ambassador/utils"
+	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 )
 
-const SecretKey string = "secret"
+var JwtSecret string = os.Getenv("JWT_SECRET")
 
 func IsAmbassador(c *fiber.Ctx) error {
 	accessTokenCookie := c.Cookies("access_token")
 
 	token, err := jwt.ParseWithClaims(accessTokenCookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
+		return []byte(JwtSecret), nil
 	})
 	if err != nil || !token.Valid {
 		return c.Status(401).JSON(fiber.Map{
@@ -38,7 +39,7 @@ func IsAmbassador(c *fiber.Ctx) error {
 		})
 	}
 
-	if isAmbassador != true {
+	if !isAmbassador {
 		return c.Status(403).JSON(fiber.Map{
 			"message": "Forbidden.",
 		})
@@ -51,7 +52,7 @@ func IsAdmin(c *fiber.Ctx) error {
 	accessTokenCookie := c.Cookies("access_token")
 
 	token, err := jwt.ParseWithClaims(accessTokenCookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
+		return []byte(JwtSecret), nil
 	})
 	if err != nil || !token.Valid {
 		return c.Status(401).JSON(fiber.Map{
@@ -75,7 +76,7 @@ func IsAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-	if isAmbassador == true {
+	if isAmbassador {
 		return c.Status(403).JSON(fiber.Map{
 			"message": "Forbidden.",
 		})

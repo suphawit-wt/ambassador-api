@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go/v74"
@@ -106,7 +107,7 @@ func CreateOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	stripe.Key = "secretKey"
+	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	params := stripe.CheckoutSessionParams{
 		Mode:               stripe.String(string(stripe.CheckoutSessionModePayment)),
@@ -174,13 +175,18 @@ func CompleteOrder(c *fiber.Ctx) error {
 
 		database.RedisClient.ZIncrBy(context.Background(), "rankings", ambassadorRevenue, user.Name())
 
+		smtpHost := os.Getenv("SMTP_HOST")
+		smtpPort := os.Getenv("SMTP_PORT")
+
+		smtpAuth := smtp.PlainAuth("", os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"), smtpHost)
+
 		ambassadorMessage := []byte(fmt.Sprintf("You earned $%f from the link #%s", ambassadorRevenue, order.Code))
 
-		smtp.SendMail("127.0.0.1:1025", nil, "no-reply@email.com", []string{order.AmbassadorEmail}, ambassadorMessage)
+		smtp.SendMail(smtpHost+":"+smtpPort, smtpAuth, "no-reply@email.com", []string{order.AmbassadorEmail}, ambassadorMessage)
 
 		adminMessage := []byte(fmt.Sprintf("Order #%d with a total of $%f has been completed", order.Id, adminRevenue))
 
-		smtp.SendMail("127.0.0.1:1025", nil, "no-reply@email.com", []string{"admin@admin.com"}, adminMessage)
+		smtp.SendMail(smtpHost+":"+smtpPort, smtpAuth, "no-reply@email.com", []string{"admin@admin.com"}, adminMessage)
 	}(order)
 
 	return c.Status(200).JSON(fiber.Map{

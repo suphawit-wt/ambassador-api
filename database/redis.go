@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -11,8 +12,12 @@ var RedisClient *redis.Client
 var RedisChannel chan string
 
 func SetupRedis() {
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
+		Addr: redisAddr,
 		DB:   0,
 	})
 }
